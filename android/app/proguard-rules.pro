@@ -8,3 +8,11 @@
 #   http://developer.android.com/guide/developing/tools/proguard.html
 
 # Add any project specific keep options here:
+
+
+-keep class com.facebook.react.** { *; }
+-keep class com.facebook.** { *; }
+-dontwarn com.facebook.react.**
+-dontwarn com.facebook.**
+-keep class androidx.** { *; }
+-dontwarn androidx.**
