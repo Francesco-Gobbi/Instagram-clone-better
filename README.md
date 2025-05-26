@@ -78,3 +78,11 @@
 *	[MetFlix ](https://github.com/Doha26/MetFlix)
 
 *	[Facebook challenge ](https://github.com/Doha26/Facebook-React-native)
+
+
+## Credits
+
+This application is based on an open source project originally developed by Pavel Foujeu aka Doha26.
+Modifications made by Gobbi Francesco to create social media shentao apps
+
+Distributed under the Apache License 2.0.
