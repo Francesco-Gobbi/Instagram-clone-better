@@ -1,4 +1,18 @@
 {
   "name": "ShentaoSocial",
-  "displayName": "Shentgram"
+  "displayName": "Shentgram",
+  "expo": {
+    "name": "codemagicSample",
+    "slug": "codemagicSample",
+    "version": "1.0.0",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "bundleIdentifier": "shengram.shentao.it"
+    },
+    "android": {
+      "package": "io.codemagic.sample.reactnative"
+    }
+  }
 }
