@@ -7,10 +7,10 @@ workflows:
       ios_signing:
         distribution_type: app_store
         bundle_identifier: shengram.shentao.it
-    vars:
-      BUNDLE_ID: "shengram.shentao.it"
-      XCODE_WORKSPACE: "ShentGram.xcworkspace"
-      XCODE_SCHEME: "ShentGram"
+      vars:
+        BUNDLE_ID: "shengram.shentao.it"
+        XCODE_WORKSPACE: "ShentGram.xcworkspace"
+        XCODE_SCHEME: "ShentGram"
     scripts:
       - name: Build ipa for distribution
         script: |
