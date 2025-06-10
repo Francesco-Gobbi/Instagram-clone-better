@@ -1,63 +1,121 @@
 workflows:
-  ios-workflow:
-    name: Codemagic IOS Workflow
-    max_build_duration: 120
-    instance_type: mac_mini_m2
-    environment:
-      ios_signing:
-        distribution_type: app_store
-        bundle_identifier: shengram.shentao.it
-      vars:
-        BUNDLE_ID: "shengram.shentao.it"
-        XCODE_WORKSPACE: "ShentGram.xcworkspace"
-        XCODE_SCHEME: "ShentGram"
-    scripts:
-      - name: Build ipa for distribution
-        script: |
-          xcode-project build-ipa \
-            --workspace "$CM_BUILD_DIR/ios/$XCODE_WORKSPACE" \
-            --scheme "$XCODE_SCHEME"
-    artifacts:
-      - build/ios/ipa/*.ipa
-      - /tmp/xcodebuild_logs/*.log
-      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.app
-      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.dSYM
-
-  android-workflow:
-    name: Codemagic ANDROID Workflow
+  react-native-android:
+    name: Android Production Build
     max_build_duration: 120
     instance_type: mac_mini_m2
     environment:
       android_signing:
-        - shentaokey
+        - shentaokey # Nome del keystore Android
       groups:
         - google_play
       vars:
-        PACKAGE_NAME: "io.codemagic.fluttersample"
-        GOOGLE_PLAY_TRACK: alpha
+        PACKAGE_NAME: "shengram.shentao.it"
+        GOOGLE_PLAY_TRACK: production # Canale di rilascio
+
     scripts:
-      - name: Install npm dependencies
+      - name: Install Node dependencies
         script: |
           npm install --legacy-peer-deps
+
+      - name: Expo Prebuild
+        script: |
+          npx expo prebuild
+
       - name: Set Android SDK location
         script: |
           echo "sdk.dir=$ANDROID_SDK_ROOT" > "$CM_BUILD_DIR/android/local.properties"
-      - name: Build Android release
+
+      - name: Build Android App Bundle
         script: |
-          LATEST_GOOGLE_PLAY_BUILD_NUMBER=$(google-play get-latest-build-number --package-name "$PACKAGE_NAME")
-          if [ -z LATEST_BUILD_NUMBER ]; then
-            # fallback in case no build number was found from Google Play.
-            # Alternatively, you can `exit 1` to fail the build
-            # BUILD_NUMBER is a Codemagic built-in variable tracking the number
-            # of times this workflow has been built
-              UPDATED_BUILD_NUMBER=$BUILD_NUMBER
-          else
-              UPDATED_BUILD_NUMBER=$(($LATEST_GOOGLE_PLAY_BUILD_NUMBER + 1))
-          fi
           cd android
           ./gradlew bundleRelease \
-              -PversionCode=$UPDATED_BUILD_NUMBER \
-              -PversionName=1.0.$UPDATED_BUILD_NUMBER
+            -PversionCode=$BUILD_NUMBER \
+            -PversionName=1.0.$BUILD_NUMBER
 
     artifacts:
       - android/app/build/outputs/**/*.aab
+
+    publishing:
+      google_play:
+        credentials: $GOOGLE_PLAY_SERVICE_ACCOUNT_CREDENTIALS
+        track: $GOOGLE_PLAY_TRACK
+        submit_as_draft: false
+
+      email:
+        recipients:
+          - gobbi.francesco.04@gmail.com
+        notify:
+          success: true
+          failure: true
+
+  react-native-ios:
+    name: iOS Production Build
+    max_build_duration: 120
+    instance_type: mac_mini_m2
+    environment:
+      xcode: 15.3.1 # Versione Xcode obbligatoria
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: shengram.shentao.it
+        certificate: shentgramkey
+        provisioning_profile: shentgramprovisioning
+
+      vars:
+        BUNDLE_ID: "shengram.shentao.it"
+        XCODE_WORKSPACE: "InstagramCloneTests.xcworkspace"
+        XCODE_SCHEME: "InstagramCloneTests"
+        APP_STORE_APPLE_ID: 6744418206
+
+    integrations:
+      app_store_connect: shentao
+
+    scripts:
+      - name: Install Node dependencies
+        script: |
+          npm install --legacy-peer-deps
+
+      - name: Expo Prebuild
+        script: |
+          npx expo prebuild
+
+      - name: Install CocoaPods dependencies
+        script: |
+          cd ios
+          pod install --repo-update
+
+      - name: Configure code signing
+        script: |
+          xcode-project use-profiles
+
+      - name: Increment build number
+        script: |
+          cd ios
+          agvtool new-version -all $BUILD_NUMBER
+
+      - name: Build IPA for App Store
+        script: |
+          xcode-project build-ipa \
+            --workspace "$CM_BUILD_DIR/ios/$XCODE_WORKSPACE" \
+            --scheme "$XCODE_SCHEME" \
+            --output-dir "$CM_BUILD_DIR/ios/build"
+
+    artifacts:
+      - ios/build/*.ipa
+      - ios/build/*.log
+
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+        beta_groups:
+          - tester
+
+        submit_to_app_store: true
+        release_on_approval: true
+
+      email:
+        recipients:
+          - gobbi.francesco.04@gmail.com
+        notify:
+          success: true
+          failure: true
