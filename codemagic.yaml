@@ -53,7 +53,6 @@ workflows:
     max_build_duration: 120
     instance_type: mac_mini_m2
     environment:
-      xcode: 15.3.1 # Versione Xcode obbligatoria
       ios_signing:
         distribution_type: app_store
         bundle_identifier: shengram.shentao.it
