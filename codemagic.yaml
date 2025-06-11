@@ -57,8 +57,6 @@ workflows:
       ios_signing:
         distribution_type: app_store
         bundle_identifier: shengram.shentao.it
-        certificate: shentgramkey
-        provisioning_profile: shentgramprovisioning
 
       vars:
         BUNDLE_ID: "shengram.shentao.it"
@@ -111,7 +109,6 @@ workflows:
           - tester
 
         submit_to_app_store: true
-        release_on_approval: true
 
       email:
         recipients:
