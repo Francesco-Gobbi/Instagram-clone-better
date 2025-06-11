@@ -71,9 +71,9 @@ workflows:
         script: |
           npm install --legacy-peer-deps
 
-      - name: Expo Prebuild
-        script: |
-          npx expo prebuild
+      # - name: Expo Prebuild
+      #   script: |
+      #     npx expo prebuild
 
       - name: Install CocoaPods dependencies
         script: |
