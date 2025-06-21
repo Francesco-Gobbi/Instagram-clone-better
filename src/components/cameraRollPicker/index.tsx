@@ -7,7 +7,7 @@ import {
     ActivityIndicator,
 } from 'react-native';
 import PropTypes from 'prop-types';
-import CameraRoll from '@react-native-community/cameraroll'
+import CameraRoll from 'react-native-cameraroll';
 import ListView from 'deprecated-react-native-listview';
 import ImageItem from './ImageItem';
 
