@@ -5,21 +5,24 @@ workflows:
     instance_type: mac_mini_m2
     environment:
       android_signing:
-        - shentaokey # Nome del keystore Android
+        - shentaokey
       groups:
         - google_play
       vars:
         PACKAGE_NAME: "shengram.shentao.it"
-        GOOGLE_PLAY_TRACK: production # Canale di rilascio
+        GOOGLE_PLAY_TRACK: production
+      node: 16
 
     scripts:
       - name: Install Node dependencies
         script: |
           npm install --legacy-peer-deps
 
-      - name: Expo Prebuild
+      - name: Clean React Native cache
         script: |
-          npx expo prebuild
+          npx react-native start --reset-cache &
+          sleep 5
+          pkill -f "react-native start" || true
 
       - name: Set Android SDK location
         script: |
@@ -28,6 +31,8 @@ workflows:
       - name: Build Android App Bundle
         script: |
           cd android
+          chmod +x gradlew
+          ./gradlew clean
           ./gradlew bundleRelease \
             -PversionCode=$BUILD_NUMBER \
             -PversionName=1.0.$BUILD_NUMBER
@@ -56,12 +61,13 @@ workflows:
       ios_signing:
         distribution_type: app_store
         bundle_identifier: shengram.shentao.it
-
       vars:
         BUNDLE_ID: "shengram.shentao.it"
-        XCODE_WORKSPACE: "InstagramCloneTests.xcworkspace"
-        XCODE_SCHEME: "InstagramCloneTests"
+        XCODE_WORKSPACE: "InstagramClone.xcworkspace"
+        XCODE_SCHEME: "InstagramClone"
         APP_STORE_APPLE_ID: 6744418206
+      node: 16
+      cocoapods: default
 
     integrations:
       app_store_connect: shentao
@@ -71,9 +77,20 @@ workflows:
         script: |
           npm install --legacy-peer-deps
 
+      - name: Clean React Native cache
+        script: |
+          npx react-native start --reset-cache &
+          sleep 5
+          pkill -f "react-native start" || true
+
+      - name: Update CocoaPods repo
+        script: |
+          pod repo update
+
       - name: Install CocoaPods dependencies
         script: |
           cd ios
+          rm -rf Pods Podfile.lock
           pod install --repo-update
 
       - name: Configure code signing
@@ -94,7 +111,7 @@ workflows:
 
     artifacts:
       - ios/build/*.ipa
-      - ios/build/*.log
+      - ios/**/*.log
 
     publishing:
       app_store_connect:
@@ -102,7 +119,6 @@ workflows:
         submit_to_testflight: true
         beta_groups:
           - tester
-
         submit_to_app_store: true
 
       email:
