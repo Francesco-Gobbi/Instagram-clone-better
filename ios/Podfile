@@ -2,6 +2,7 @@ require_relative '../node_modules/react-native/scripts/react_native_pods'
 # require_relative '../node_modules/react-native/scripts/react_native_pods_dependencies'
 
 platform :ios, '13.0'
+project 'InstagramClone.xcodeproj' 
 prepare_react_native_project!
 
 target 'InstagramClone' do
